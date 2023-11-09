@@ -5,6 +5,9 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 
+// middleware
+app.use(cors());
+app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.wdcasbo.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -23,10 +26,18 @@ async function run() {
     await client.connect();
     const foodCollection = client.db('restaurant').collection('food');
 
+    app.get('/addfood/:id', async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) }
+        const result = await foodCollection.findOne(query);
+        res.send(result);
+    })
+
+
     app.post('/addfood', async (req, res) => {
-        const newCoffee = req.body;
-        console.log(newCoffee);
-        const result = await coffeeCollection.insertOne(newCoffee);
+        const newFood = req.body;
+        console.log(newFood);
+        const result = await foodCollection.insertOne(newFood);
         res.send(result);
     })
     app.get("/addfood", async (req, res) => {
@@ -53,3 +64,4 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`Restaurant management Server is running on port: ${port}`)
 })
+
